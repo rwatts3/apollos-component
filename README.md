@@ -1,9 +1,8 @@
 Apollos Components
 =======================
 
-*Credit*
-This is a port with increasingly heavy modifications from the awesome BlazeComponents by [Peerlibrary](https://github.com/peerlibrary). For the original library go [here](https://github.com/peerlibrary/meteor-blaze-components).
-Much thanks to [Mitar](https://github.com/mitar) for his excellent work moving forward large scale UI applications in Meteor.
+*This is a port with increasingly heavy modifications from the awesome BlazeComponents by [Peerlibrary](https://github.com/peerlibrary). For the original library go [here](https://github.com/peerlibrary/meteor-blaze-components).
+Much thanks to [Mitar](https://github.com/mitar) for his excellent work moving forward large scale UI applications in Meteor.*
 
 
 Apollos Components for [Meteor](https://meteor.com/) are a system for easily developing complex UI elements
