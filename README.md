@@ -67,11 +67,11 @@ class ExampleComponent extends Component
 
 
   # Create reactivevar and expose them to the template as a helper
-  vars: -> {
+  vars: -> [
 
     counter: 0
 
-  }
+  ]
 
   # Mapping between events and their handlers.
   events: -> [

@@ -175,7 +175,7 @@ addEvents = (view, component) ->
 
   eventsList = component.events()
 
-  if not _.isArray events
+  if not _.isArray eventsList
     debug(
       "`events` methods from the component `#{ component.componentName() or 'unnamed' }` did not return an array of event maps"
     )
@@ -566,7 +566,7 @@ class Component extends Apollos.Base
                 continue
 
               if _.isObject subscriptions
-                
+
                 for _name, method of subscriptions
 
                   # grab name of subscription
