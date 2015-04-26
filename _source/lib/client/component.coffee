@@ -173,53 +173,54 @@ viewToTemplateInstance = (view) ->
 
 addEvents = (view, component) ->
 
-  events = component.events()
+  eventsList = component.events()
 
-  if not _.isObject events
+  if not _.isArray events
     debug(
-      "`events` methods from the component `#{ component.componentName() or 'unnamed' }` did not return a map of events"
+      "`events` methods from the component `#{ component.componentName() or 'unnamed' }` did not return an array of event maps"
     )
     return
 
+  for events in eventsList
 
-  eventMap = {}
+    eventMap = {}
 
-  for event, action of events
+    for event, action of events
 
-    do (event, action) ->
+      do (event, action) ->
 
-      eventMap[event] = (args...) ->
+        eventMap[event] = (args...) ->
 
-        _event = args[0]
+          _event = args[0]
 
-        currentView = Blaze.getView event.currentTarget
-        templateInstance = viewToTemplateInstance currentView
+          currentView = Blaze.getView event.currentTarget
+          templateInstance = viewToTemplateInstance currentView
 
-        withTemplateInstanceFunc = Template._withTemplateInstanceFunc
-
-        ###
-
-          We set template instance based on the current target so that inside event handlers Component.currentComponent() returns the component of event target.
-
-        ###
-        withTemplateInstanceFunc templateInstance, ->
+          withTemplateInstanceFunc = Template._withTemplateInstanceFunc
 
           ###
 
-            We set view based on the current target so that inside event handlers Component.currentData() (and Blaze.getData() and Template.currentData()) returns data context of event target and not component/template.
+            We set template instance based on the current target so that inside event handlers Component.currentComponent() returns the component of event target.
 
           ###
-          Blaze._withCurrentView currentView, ->
-            action.apply component, args
+          withTemplateInstanceFunc templateInstance, ->
 
-        # Make sure CoffeeScript does not return anything. Returning from event
-        # handlers is deprecated.
-        return
+            ###
 
-  # bind them to the views events
-  Blaze._addEventMap view, eventMap
+              We set view based on the current target so that inside event handlers Component.currentData() (and Blaze.getData() and Template.currentData()) returns data context of event target and not component/template.
 
-  return
+            ###
+            Blaze._withCurrentView currentView, ->
+              action.apply component, args
+
+          # Make sure CoffeeScript does not return anything. Returning from event
+          # handlers is deprecated.
+          return
+
+    # bind them to the views events
+    Blaze._addEventMap view, eventMap
+
+    return
 
 
 
@@ -526,23 +527,24 @@ class Component extends Apollos.Base
             and setting the default values isn't great yet. Here we attach each var to the component that way it can be gotten via .get and is available in the template as a tag. I'm a little bit worried about polluting the render namespace so should this be kept on the vars object?
 
           ###
-          vars = component.vars()
-          if _.isObject vars
+          varList = component.vars()
+          if _.isArray varList
 
-            for _var, _default of vars
+            for vars in varList
+              for _var, _default of vars
 
-              if component[_var]
-                debug "#{_var} is already a method on #{component.componentName()}"
-                continue
+                if component[_var]
+                  debug "#{_var} is already a method on #{component.componentName()}"
+                  continue
 
-              ###
+                ###
 
-                @TODO:
-                  - Need to add in way to add reactive comparators
-                  - Need to be able to extend vars from parent components
+                  @TODO:
+                    - Need to add in way to add reactive comparators
+                    - Need to be able to extend vars from parent components
 
-              ###
-              component[_var] = new ReactiveVar _default
+                ###
+                component[_var] = new ReactiveVar _default
 
 
 
@@ -554,33 +556,33 @@ class Component extends Apollos.Base
               - Need to be able to extend subscribes from parent components
 
           ###
-          subscriptions = component.subscriptions()
-          if _.isObject subscriptions
+          subscriptionsList = component.subscriptions()
+          if _.isArray subscriptionsList
 
-            for _name, method of subscriptions
+            for subscriptions in subscriptionList
 
-              # simple subscriptions as a string
-              if typeof method is "string"
+              if typeof subscriptions is "string"
                 @.subscribe method
                 continue
 
-              # complex subscription
-              if _.isObject method
+              if _.isObject subscriptions
+                
+                for _name, method of subscriptions
 
-                # grab name of subscription
-                subHandle = [_name]
+                  # grab name of subscription
+                  subHandle = [_name]
 
-                # futher args?
-                if method.args?.length
-                  subHandle = subHandle.concat method.args
+                  # futher args?
+                  if method.args?.length
+                    subHandle = subHandle.concat method.args
 
-                # callback?
-                if method.callback
-                  subHandle.push method.callback
+                  # callback?
+                  if method.callback
+                    subHandle.push method.callback
 
-                @.subscribe.apply @, subHandle
+                  @.subscribe.apply @, subHandle
 
-                continue
+                  continue
 
 
           @.component = component

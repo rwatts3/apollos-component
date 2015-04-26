@@ -54,9 +54,6 @@
         "export": {
           "Component": "client"
         }
-      },
-      "test": {
-        "mocha": "both"
       }
     },
     "meteor": {
