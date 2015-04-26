@@ -1,0 +1,2 @@
+
+Component = Apollos.Component

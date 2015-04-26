@@ -1,0 +1,17 @@
+{
+  "name": "apollos-components",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "norma-javascript": "^0.4.2",
+    "norma-markup": "^0.5.3",
+    "norma-meteor": "^0.3.14",
+    "norma-meteor-load": "^0.2.1"
+  }
+}

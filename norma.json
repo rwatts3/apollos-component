@@ -1,0 +1,75 @@
+{
+  "name": "apollos-components",
+  "tasks": {
+    "javascript": {
+      "src": "_source/lib/**/*",
+      "dest": "lib/"
+    },
+    "app-javascript": {
+      "@extend": "javascript",
+      "src": "app/**/*",
+      "dest": "./workbench/"
+    },
+    "markup": {
+      "src": "_source/lib/**/*",
+      "dest": "lib/",
+      "minify": true
+    },
+    "app-markup": {
+      "@extend": "markup",
+      "src": "app/**/*",
+      "dest": "./workbench/"
+    },
+    "copy": {
+      "src": "lib/**/*",
+      "dest": "./workbench/packages/apollos-components/lib/",
+      "order": "post"
+    },
+    "copy-package": {
+      "@extend": "copy",
+      "src": "package",
+      "dest": "./workbench/packages/apollos-components/",
+      "order": "post",
+      "ext": [
+        "js"
+      ]
+    },
+    "meteor-load": {
+      "src": "lib/**/*",
+      "dest": "./",
+      "org": "newspring",
+      "name": "components",
+      "package": {
+        "versionsFrom": "1.0.3.1",
+        "use": {
+          "meteor-platform": "both",
+          "blaze": "both",
+          "templating": "both",
+          "underscore": "both",
+          "tracker": "both",
+          "ejson": "both",
+          "spacebars": "both",
+          "reactive-var": "both"
+        },
+        "export": {
+          "Component": "client"
+        }
+      },
+      "test": {
+        "mocha": "both"
+      }
+    },
+    "meteor": {
+      "src": "workbench",
+      "packages": [
+        "meteor-platform",
+        "newspring:components"
+      ],
+      "platforms": [
+        "server",
+        "browser"
+      ]
+    }
+  },
+  "test": "meteor --test"
+}
