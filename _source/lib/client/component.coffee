@@ -656,7 +656,7 @@ class Component extends Apollos.Base
             if componentParent
               # The component has been destroyed, clear up the parent.
               component.parent null
-              componentParent.removechild component
+              componentParent.removeChild component
 
             # Remove the reference so that it is clear that template instance is not available anymore.
             delete @.component._internals.templateInstance
