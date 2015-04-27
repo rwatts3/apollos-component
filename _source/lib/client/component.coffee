@@ -797,7 +797,6 @@ for methodName, method of Blaze.TemplateInstance::
     #   return
 
     Component::[methodName] = (args...) ->
-      console.log methodName
       @._internals.templateInstance[methodName] args...
 
 
