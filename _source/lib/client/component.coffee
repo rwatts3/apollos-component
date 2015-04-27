@@ -735,7 +735,7 @@ class Component extends Apollos.Base
   # top-level data context used to render the component.
   # Same as Template.currentData
   data: ->
-    return Blaze.getData(@.templateInstance.view) or null
+    return Blaze.getData(@._internals.templateInstance.view) or null
 
   ###
 
