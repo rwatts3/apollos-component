@@ -7,7 +7,7 @@
     },
     "app-javascript": {
       "@extend": "javascript",
-      "src": "sample-app**/*",
+      "src": "sample-app/**/*",
       "dest": "./workbench/"
     },
     "markup": {
@@ -17,7 +17,7 @@
     },
     "app-markup": {
       "@extend": "markup",
-      "src": "sample-app**/*",
+      "src": "sample-app/**/*",
       "dest": "./workbench/"
     },
     "copy": {

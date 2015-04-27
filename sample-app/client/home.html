@@ -24,5 +24,11 @@
 <template name="Foo">
   <button class="increment">Click me</button>
   {{! You can include subtemplates to structure your templates.}}
-  {{> subTemplate}}
+  {{> ExampleComponent
+    name="email"
+    placeholder="user@email.com"
+    label="Email"
+    validate="isEmail"
+    errorText="Please enter a valid email"
+  }}
 </template>

@@ -138,6 +138,10 @@ bindDataContext = (helper) ->
 
 wrapHelper = (f, templateFunc) ->
 
+  # XXX COMPAT WITH METEOR 1.0.3.2
+  if not Blaze.Template._withTemplateInstanceFunc
+    return Blaze._wrapCatchingExceptions f, "template helper"
+
   if typeof f isnt "function"
     return f
 
@@ -446,7 +450,7 @@ class Component extends Apollos.Base
     Tracker.nonreactive =>
       component = @
 
-      component._componentInternals ?= {}
+      component._internals ?= {}
 
       componentTemplate = component.componentName()
 
@@ -477,7 +481,7 @@ class Component extends Apollos.Base
 
       # We on purpose do not reuse helpers, events, and hooks. Templates are used only for HTML rendering.
 
-      @.component._componentInternals ?= {}
+      @.component._internals ?= {}
 
       registerHooks template,
 
@@ -489,7 +493,7 @@ class Component extends Apollos.Base
 
             ###
 
-              component.componentParent is reactive, so we use
+              component.parent is reactive, so we use
               Tracker.nonreactive just to make sure we do not leak any
               reactivity here.
 
@@ -506,7 +510,7 @@ class Component extends Apollos.Base
               ###
 
               # We set the parent only when the component is created, not just constructed.
-              component.componentParent componentParent
+              component.parent componentParent
               componentParent.addChild component
 
 
@@ -595,22 +599,22 @@ class Component extends Apollos.Base
               - For different component parents or only the same one?
 
           ###
-          @.component._componentInternals.templateInstance = @
+          @.component._internals.templateInstance = @
 
           # We need to run the onCreated of the child component
           @.component.onCreated()
 
 
-          @.component._componentInternals.isCreated ?= new ReactiveVar true
-          @.component._componentInternals.isCreated.set true
+          @.component._internals.isCreated ?= new ReactiveVar true
+          @.component._internals.isCreated.set true
 
           # Maybe we are re-rendering the component. So let's initialize variables just to be sure.
 
-          @.component._componentInternals.isRendered ?= new ReactiveVar false
-          @.component._componentInternals.isRendered.set false
+          @.component._internals.isRendered ?= new ReactiveVar false
+          @.component._internals.isRendered.set false
 
-          @.component._componentInternals.isDestroyed ?= new ReactiveVar false
-          @.component._componentInternals.isDestroyed.set false
+          @.component._internals.isDestroyed ?= new ReactiveVar false
+          @.component._internals.isDestroyed.set false
 
           return
 
@@ -621,8 +625,8 @@ class Component extends Apollos.Base
           # We need to run the onRendered of the child component
           @.component.onRendered()
 
-          @component._componentInternals.isRendered ?= new ReactiveVar true
-          @component._componentInternals.isRendered.set true
+          @component._internals.isRendered ?= new ReactiveVar true
+          @component._internals.isRendered.set true
 
 
         onDestroyed: ->
@@ -632,18 +636,18 @@ class Component extends Apollos.Base
 
             # We wait for all children components to be destroyed first.
             # See https://github.com/meteor/meteor/issues/4166
-            if @.component.componentChildren().length
+            if @.component.children().length
               return
 
             computation.stop()
 
-            @component._componentInternals.isCreated.set false
+            @component._internals.isCreated.set false
 
-            @component._componentInternals.isRendered ?= new ReactiveVar false
-            @component._componentInternals.isRendered.set false
+            @component._internals.isRendered ?= new ReactiveVar false
+            @component._internals.isRendered.set false
 
-            @component._componentInternals.isDestroyed ?= new ReactiveVar true
-            @component._componentInternals.isDestroyed.set true
+            @component._internals.isDestroyed ?= new ReactiveVar true
+            @component._internals.isDestroyed.set true
 
 
             # We need to run the onDestroyed of the child component
@@ -651,11 +655,11 @@ class Component extends Apollos.Base
 
             if componentParent
               # The component has been destroyed, clear up the parent.
-              component.componentParent null
-              componentParent.removeComponentChild component
+              component.parent null
+              componentParent.removechild component
 
             # Remove the reference so that it is clear that template instance is not available anymore.
-            delete @.component._componentInternals.templateInstance
+            delete @.component._internals.templateInstance
 
             return
 
@@ -673,22 +677,22 @@ class Component extends Apollos.Base
   onDestroyed: ->
 
   isCreated: ->
-    @._componentInternals ?= {}
-    @._componentInternals.isCreated ?= new ReactiveVar false
+    @._internals ?= {}
+    @._internals.isCreated ?= new ReactiveVar false
 
-    return @._componentInternals.isCreated.get()
+    return @._internals.isCreated.get()
 
   isRendered: ->
-    @._componentInternals ?= {}
-    @._componentInternals.isRendered ?= new ReactiveVar false
+    @._internals ?= {}
+    @._internals.isRendered ?= new ReactiveVar false
 
-    return @._componentInternals.isRendered.get()
+    return @._internals.isRendered.get()
 
   isDestroyed: ->
-    @._componentInternals ?= {}
-    @._componentInternals.isDestroyed ?= new ReactiveVar false
+    @._internals ?= {}
+    @._internals.isDestroyed ?= new ReactiveVar false
 
-    return @._componentInternals.isDestroyed.get()
+    return @._internals.isDestroyed.get()
 
 
   insertDOMElement: (parent, node, before) ->
@@ -757,25 +761,25 @@ class Component extends Apollos.Base
 
 
   firstNode: ->
-    return @._componentInternals.templateInstance.firstNode
+    return @._internals.templateInstance.firstNode
 
 
   lastNode: ->
-    return @._componentInternals.templateInstance.lastNode
+    return @._internals.templateInstance.lastNode
 
 
   # parentTemplate: (level, includeBlockHelpers) ->
-  #   template = @._componentInternals.templateInstance
+  #   template = @._internals.templateInstance
   #
   #   level or= 1
   #
-  #   template = @._componentInternals.templateInstance.__parent(level, includeBlockHelpers)
+  #   template = @._internals.templateInstance.__parent(level, includeBlockHelpers)
   #
   #   # keep on climbing if we have a Component
   #   isComponent = template.name?.match(/Component\./)?.length > 0
   #   while isComponent
   #
-  #     template = @._componentInternals.templateInstance.__parent(level, includeBlockHelpers)
+  #     template = @._internals.templateInstance.__parent(level, includeBlockHelpers)
   #
   #     if not template
   #       return null
@@ -793,7 +797,7 @@ for methodName, method of Blaze.TemplateInstance::
     #   return
 
     Component::[methodName] = (args...) ->
-      @._componentInternals.templateInstance[methodName] args
+      @._internals.templateInstance[methodName] args
 
 
 
