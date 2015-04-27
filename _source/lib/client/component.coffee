@@ -723,13 +723,13 @@ class Component extends Apollos.Base
     return
 
   events: ->
-    return {}
+    return []
 
   subscriptions: ->
-    return {}
+    return []
 
   vars: ->
-    return {}
+    return []
 
   # Component-level data context. Reactive. Use this to always get the
   # top-level data context used to render the component.
