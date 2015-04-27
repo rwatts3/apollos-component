@@ -25,6 +25,7 @@ class ExampleComponent extends Component
 
   onClick: (event) ->
     @.counter.set @.counter.get() + 1
+    console.log @.find(".increment")
 
 
   # Any component"s method is available as a template helper in the template.
@@ -58,7 +59,7 @@ class Foo extends ExampleComponent
       @.color.set "blue"
     else
       @.color.set "red"
-    
+
     super
 
 
