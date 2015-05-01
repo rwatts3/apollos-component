@@ -1,11 +1,11 @@
 {
   "name": "apollos-components",
-  "version": "0.1.9",
+  "version": "0.1.8",
   "description": "Develop complex UI elements that need to be reused around your Meteor app.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "norma build; npm version patch; meteor publish"
+    "deploy": " npm version patch; norma build; meteor publish"
   },
   "author": "",
   "license": "MIT",
