@@ -6,6 +6,7 @@
       "dest": "lib/"
     },
     "app-javascript": {
+      "dev": true,
       "@extend": "javascript",
       "src": "sample-app/**/*",
       "dest": "./workbench/"
@@ -16,6 +17,7 @@
       "minify": true
     },
     "app-markup": {
+      "dev": true,
       "@extend": "markup",
       "src": "sample-app/**/*",
       "dest": "./workbench/"
@@ -57,6 +59,7 @@
       }
     },
     "meteor": {
+      "dev": true,
       "src": "workbench",
       "packages": [
         "meteor-platform",

@@ -4,7 +4,8 @@
   "description": "Develop complex UI elements that need to be reused around your Meteor app.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "norma build; npm version patch; meteor publish"
   },
   "author": "",
   "license": "MIT",
@@ -13,6 +14,6 @@
     "norma-javascript": "^0.4.2",
     "norma-markup": "^0.5.3",
     "norma-meteor": "^0.3.14",
-    "norma-meteor-load": "^0.2.1"
+    "norma-meteor-load": "^0.2.2"
   }
 }
