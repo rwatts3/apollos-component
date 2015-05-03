@@ -146,9 +146,11 @@ class AnimatedListComponent extends Component
 
 Component.register 'AnimatedListComponent', AnimatedListComponent
 
-class MyNamespace
-
-class MyNamespace.Foo
+# class MyNamespace
+#
+# class MyNamespace.Foo
+MyNamespace = {}
+MyNamespace.Foo = {}
 
 class MyNamespace.Foo.MyComponent extends Component
   @register 'MyNamespace.Foo.MyComponent'

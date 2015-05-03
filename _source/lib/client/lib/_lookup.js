@@ -96,7 +96,8 @@ Blaze.View.prototype.lookup = function (name, _options) {
     // starts with a dot. must be a series of dots which maps to an
     // ancestor of the appropriate height.
     if (!/^(\.)+$/.test(name))
-      throw new Error("id starting with dot must be a series of dots");
+      console.log("id starting with dot must be a series of dots");
+      return null
 
     return Blaze._parentData(name.length - 1, true /*_functionWrapped*/);
 
@@ -114,17 +115,20 @@ Blaze.View.prototype.lookup = function (name, _options) {
       var isCalledAsFunction = (arguments.length > 0);
       var data = Blaze.getData();
       if (lookupTemplate && ! (data && data[name])) {
-        throw new Error("No such template: " + name);
+        console.log("No such template: " + name);
+        return null
       }
       if (isCalledAsFunction && ! (data && data[name])) {
-        throw new Error("No such function: " + name);
+        console.log("No such function: " + name);
+        return null
       }
       if (! data)
         return null;
       var x = data[name];
       if (typeof x !== 'function') {
         if (isCalledAsFunction) {
-          throw new Error("Can't call non-function: " + x);
+          console.log("Can't call non-function: " + x);
+          return null
         }
         return x;
       }
