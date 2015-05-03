@@ -22,6 +22,26 @@ Spacebars.dot = (value, args...) ->
   originalDot value, args...
 
 
+
+###
+
+  If Namespace gets all the way to the Spacebars.include it means that we are in the situation where there is both namespace and component with the same name, and user is including a component. But namespace reference is created instead (because we do not know in advance that there is no Spacebars.dot call around lookup call). So we dereference the reference and try to resolve a template. Of course, a component might not really exist.
+
+###
+originalInclude = Spacebars.include
+Spacebars.include = (templateOrFunction, args...) ->
+
+
+  if templateOrFunction instanceof Namespace
+    templateOrFunction = Blaze._getTemplate(
+      templateOrFunction.namespace,
+      templateOrFunction.templateInstance
+    )
+
+  return originalInclude templateOrFunction, args...
+
+
+
 ###
 
   We override the original lookup method with a similar one, which supports components as well.
@@ -44,6 +64,7 @@ Spacebars.dot = (value, args...) ->
 ###
 
 Blaze._getTemplateHelper = (template, name, templateInstance) ->
+
 
   if template.__helpers.has name
 
@@ -90,7 +111,6 @@ Blaze._getTemplateHelper = (template, name, templateInstance) ->
   component = Tracker.nonreactive ->
     return templateInstance().get "component"
 
-
   # Component
   if component
     return wrapHelper(
@@ -107,10 +127,9 @@ Blaze._getTemplateHelper = (template, name, templateInstance) ->
 
   ###
 
-  # if name and name of Apollos.Base.components
-  #   console.log "inside here"
-    # return new Namespace name, templateInstance
-    # return template
+  if name and name of Apollos.Base.components
+    return new Namespace name, templateInstance
+
 
   return null
 
@@ -323,8 +342,8 @@ registerFirstCreatedHook = (template, onCreated) ->
 #
 # - junction selection binding
 #
-# - parent
-# - children
+# - parent (✓)
+# - children (✓)
 
 Apollos.components = {}
 
@@ -339,7 +358,8 @@ class Component extends Apollos.Base
 
     # This uses the same check if the argument is a DOM element that Blaze._DOMRange.forElement does.
     if domElement.nodeType isnt Node.ELEMENT_NODE
-      console.log "Expected DOM element."
+      debug "Expected DOM element."
+      return
 
     template = Blaze.getView(domElement)?.templateInstance()
 
@@ -452,9 +472,7 @@ class Component extends Apollos.Base
 
       component._internals ?= {}
 
-      componentTemplate = component.componentName()
-
-      # if its a string, load the string
+      componentTemplate = component.template()
       if _.isString componentTemplate
         templateBase = Template[componentTemplate]
         if not templateBase
@@ -667,8 +685,15 @@ class Component extends Apollos.Base
       return template
 
   template: ->
-    # You have to override this method with a method which returns a template name or template itself.
-    throw new Error "Component method 'template' not overridden."
+
+    template = @.constructor.componentName()
+
+
+    if not template
+      debug "Component is missing a name and component's 'template' method is not overridden."
+      return
+
+    return template
 
   onCreated: ->
 

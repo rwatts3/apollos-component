@@ -1,68 +1,157 @@
-class ExampleComponent extends Component
-  # Register a component so that it can be included in templates. It also
-  # gives the component the name. The convention is to use the class name.
-  @register "ExampleComponent"
+class MainComponent extends Component
+  foobar: ->
+    "#{ @componentName() }/MainComponent.foobar/#{ EJSON.stringify @data() }/#{ EJSON.stringify @currentData() }/#{ @currentComponent().componentName() }"
 
-  # Which template to use for this component.
-  template: "ExampleComponent"
+  foobar2: ->
+    "#{ @componentName() }/MainComponent.foobar2/#{ EJSON.stringify @data() }/#{ EJSON.stringify @currentData() }/#{ @currentComponent().componentName() }"
 
+  foobar3: ->
+    "#{ @componentName() }/MainComponent.foobar3/#{ EJSON.stringify @data() }/#{ EJSON.stringify @currentData() }/#{ @currentComponent().componentName() }"
 
-  # Create reactivevar and expose them to the template as a helper
-  vars: -> [
+  isMainComponent: ->
+    @constructor is MainComponent
 
-    counter: 0
+  onClick: (event) ->
+    console.log @componentName(), 'MainComponent.onClick', @data(), @currentData(), @currentComponent().componentName()
 
-  ]
-
-  # Mapping between events and their handlers.
   events: -> [
-    # You could inline the handler, but the best is to make
-    # it a method so that it can be extended later on.
-    "click .increment": @.onClick
-
-
+    'click': @onClick
   ]
 
+Component.register 'MainComponent', MainComponent
+
+class @FooComponent extends Component
+
+Component.register 'FooComponent', FooComponent
+
+class SubComponent extends MainComponent
+  template: ->
+    'MainComponent'
+
+  foobar: ->
+    "#{ @componentName() }/SubComponent.foobar/#{ EJSON.stringify @data() }/#{ EJSON.stringify @currentData() }/#{ @currentComponent().componentName() }"
+
+  foobar2: ->
+    "#{ @componentName() }/SubComponent.foobar2/#{ EJSON.stringify @data() }/#{ EJSON.stringify @currentData() }/#{ @currentComponent().componentName() }"
+
+  # We on purpose do not override foobar3.
+
   onClick: (event) ->
-    @.counter.set @.counter.get() + 1
-    console.log @.find(".increment")
+    console.log @componentName(), 'SubComponent.onClick', @data(), @currentData(), @currentComponent().componentName()
 
+Component.register 'SubComponent', SubComponent
 
-  # Any component"s method is available as a template helper in the template.
-  customHelper: ->
-    if @.counter.get() > 10
-      "Too many times"
-    else if @.counter.get() is 10
-      "Just enough"
-    else
-      "Click more"
+# jQuery offset() returns coordinates of the content part of the element,
+# ignoring any margins. outerOffset() returns outside coordinates of the
+# element, including margins.
+$.fn.outerOffset = ->
+  marginLeft = parseFloat(this.css('margin-left'))
+  marginTop = parseFloat(this.css('margin-top'))
+  offset = this.offset()
+  offset.left -= marginLeft
+  offset.top -= marginTop
+  offset
 
+class AnimatedListComponent extends Component
 
-class Foo extends ExampleComponent
-
-  @register "Foo"
-
-  template: "Foo"
-
-
-  # Create reactivevar and expose them to the template as a helper
   vars: ->
+    [
+      _list: [1...6]
+    ]
 
-    super.concat
+  onCreated: ->
+    # @_list = new ReactiveVar [1...6]
+    @_handle = Meteor.setInterval =>
+      list = @_list.get()
+      # assert list.length > 1
+      indexFrom = parseInt Random.fraction() * list.length
+      indexTo = indexFrom
+      while indexTo is indexFrom
+        indexTo = parseInt Random.fraction() * list.length
+      list.splice indexTo, 0, list.splice(indexFrom, 1)[0]
+      @_list.set list
+    , 2000 # ms
 
-      color: "red"
+  onDestroyed: ->
+    Meteor.clearInterval @_handle
 
+  list: ->
+    _id: i for i in @_list.get()
 
+  moveDOMElement: (parent, node, before) ->
+    $node = $(node)
+    # Traversing until a node works better because sometimes "before" is a text node and
+    # then it is not found correctly and nextUntil/prevUntil selects everything. This
+    # means that we are traversing backwards so code is a bit less clear. Originally it
+    # was $node.prevUntil(before).add(before) and $node.nextUntil(before).
+    $prev = $(before).nextUntil(node).add(before) # node is inserted before "before", so we add "before" as well
+    $next = $(before).prevUntil(node)
 
-  onClick: (event) ->
-    if @.color.get() is "red"
-      @.color.set "blue"
+    nodeOuterHeight = $node.outerHeight true
+
+    oldNodeOffset = $node.outerOffset()
+    $node.detach().insertBefore(before)
+    newNodeOffset = $node.outerOffset()
+
+    $node.css(
+      # We want for node to go over the other elements.
+      position: 'relative'
+      zIndex: 1
+    ).velocity(
+      translateZ: 0
+      # We translate the node temporary back to the old position.
+      translateY: [oldNodeOffset.top - newNodeOffset.top]
+    ,
+      duration: 0
+    ).velocity(
+      # And then animate them slowly to new position.
+      translateY: [0]
+    ,
+      duration: 1000
+      complete: ->
+        $node.css(
+          # After it finishes, we remove display and z-index.
+          position: ''
+          zIndex: ''
+        )
+    )
+
+    # TODO: Find a better way to determine which elements are between node and "before", a way which does not assume order of elements in DOM tree has same direction as elements' positions
+    # Currently, we store both previous and next elements and then after the move we determine
+    # which are those elements we also have to move to make visually space for a moved node.
+    if oldNodeOffset.top - newNodeOffset.top < 0
+      # Moving node down
+      $betweenElements = $next
     else
-      @.color.set "red"
+      # Moving node up
+      $betweenElements = $prev
 
-    super
+    $betweenElements = $betweenElements.filter (i, element) ->
+      element.nodeType isnt Node.TEXT_NODE
 
+    $betweenElements.velocity(
+      translateZ: 0
+      # We translate nodes in-between temporary back to the old position.
+      translateY: [if oldNodeOffset.top - newNodeOffset.top < 0 then nodeOuterHeight else -1 * nodeOuterHeight]
+    ,
+      duration: 0
+    ).velocity(
+      # And then animate them slowly to new position.
+      translateY: [0]
+    ,
+      duration: 1000
+    )
 
-  # Any component"s method is available as a template helper in the template.
-  customHelper: ->
-    @.color.get()
+    return
+
+Component.register 'AnimatedListComponent', AnimatedListComponent
+
+class MyNamespace
+
+class MyNamespace.Foo
+
+class MyNamespace.Foo.MyComponent extends Component
+  @register 'MyNamespace.Foo.MyComponent'
+
+  dataContext: ->
+    EJSON.stringify @data()

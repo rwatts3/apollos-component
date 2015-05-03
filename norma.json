@@ -63,7 +63,8 @@
       "src": "workbench",
       "packages": [
         "meteor-platform",
-        "newspring:components"
+        "newspring:components",
+        "percolate:velocityjs"
       ],
       "platforms": [
         "server",

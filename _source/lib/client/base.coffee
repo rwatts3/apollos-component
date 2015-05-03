@@ -1,5 +1,4 @@
 
-
 ###
 
   Comparing arrays of components by reference. This might not be really necessary to do, because all operations we officially support modify length of the array (add a new component or remove an old one). But if somebody is modifying the reactive variable directly we want a sane behavior. The default ReactiveVar equality always returns false when comparing any non-primitive values. Because the order of components in the children array is arbitrary we could further improve this comparison to compare arrays as sets, ignoring the order. Or we could have some canonical order of components in the array.
@@ -49,11 +48,84 @@ isolateValue = (fn) ->
   return lastValue
 
 
+getPathAndName = (name) ->
+
+  path = name.split "."
+  name = path.pop()
+
+  return {path, name}
+
+
+getNamespace = (components, path) ->
+
+  match = components
+
+  while (segment = path.shift())?
+    match = match[segment]
+
+    if not _.isObject match
+      return null
+
+  if not _.isObject match
+    return null
+
+  return match or null
+
+
+createNamespace = (components, path) ->
+
+  match = components
+
+  while (segment = path.shift())?
+    if not (segment of match)
+      match[segment] = new components.constructor()
+
+    match = match[segment]
+
+
+  return match
+
+
+getComponent = (components, name) ->
+
+  if not name
+    return null
+
+  {path, name} = getPathAndName name
+  namespace = getNamespace components, path
+
+  if not namespace
+    return null
+
+  return namespace[components.constructor.COMPONENT]?[name] or null
+
+
+setComponent = (components, name, component) ->
+
+
+  {path, name} = getPathAndName name
+
+  namespace = createNamespace components, path
+
+  namespace[components.constructor.COMPONENT] ?= new components.constructor()
+
+
+  namespace[components.constructor.COMPONENT][name] = component
+
+
+class ComponentNamespace
+
+  ###
+
+    We have a special field for components. This allows us to have the namespace with the same name as a component, without overriding anything in the component (we do not want to use component object as a namespace object).
+
+  ###
+  @COMPONENT: ""
 
 
 class Base
 
-  @components: {}
+  @components: new ComponentNamespace()
 
 
   @register: (componentName, componentClass) ->
@@ -65,7 +137,7 @@ class Base
     # To allow calling @register 'name' from inside a class body.
     componentClass ?= @
 
-    if componentName of @.components
+    if getComponent @components, componentName
       debug "Component '#{ componentName }' already registered."
       return
 
@@ -77,27 +149,36 @@ class Base
     ###
     if componentClass.componentName() and
     componentClass.componentName() isnt componentName and
-    @.components[componentClass.componentName()] is componentClass
+    getComponent(@components, componentClass.componentName()) is componentClass
+    # if componentClass.componentName() and
+    # componentClass.componentName() isnt componentName and
+    # @components[componentClass.componentName()] is componentClass
 
       debug "Component '#{ componentName }' already registered under the name '#{ componentClass.componentName() }'."
       return
 
 
 
-
-
     componentClass.componentName componentName
 
-    @.components[componentName] = componentClass
+    setComponent @components, componentName, componentClass
+    # @.components[componentName] = componentClass
 
     # To allow chaining.
     return @
 
 
 
-  @getComponent: (componentName) ->
+  @getComponent: (componentsNamespace, componentName) ->
 
-    @.components[componentName] or null
+    if not componentName
+      componentName = componentsNamespace
+      componentsNamespace = @.components
+
+    if not componentName
+      return null
+
+    return getComponent componentsNamespace, componentName
 
 
 
@@ -236,7 +317,6 @@ class Base
 
     # getter
     @._internals.parent.get()
-
 
 
 
