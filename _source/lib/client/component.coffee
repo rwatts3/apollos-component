@@ -65,7 +65,6 @@ Spacebars.include = (templateOrFunction, args...) ->
 
 Blaze._getTemplateHelper = (template, name, templateInstance) ->
 
-
   if template.__helpers.has name
 
     helper = template.__helpers.get name
@@ -113,9 +112,10 @@ Blaze._getTemplateHelper = (template, name, templateInstance) ->
 
   # Component
   if component
-    return wrapHelper(
-      bindComponent(component, component[name]), templateInstance
-    )
+    if name of component
+      return wrapHelper(
+        bindComponent(component, component[name]), templateInstance
+      )
 
 
   ###
@@ -126,7 +126,6 @@ Blaze._getTemplateHelper = (template, name, templateInstance) ->
       - We should provide a Apollos.Base.getNamespace method instead of accessing components directly.
 
   ###
-
   if name and name of Apollos.Base.components
     return new Namespace name, templateInstance
 
@@ -367,7 +366,7 @@ class Component extends Apollos.Base
 
 
 
-    ###
+  ###
 
     This class method more or less just creates an instance of a component and calls its renderComponent method. But because we want to allow passing arguments to the component in templates, we have some complicated code around to extract and pass those arguments. It is similar to how data context is passed to block helpers. In a data context visible only to the block helper template.
 

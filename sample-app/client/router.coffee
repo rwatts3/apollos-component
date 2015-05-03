@@ -152,7 +152,10 @@ Component.register 'AnimatedListComponent', AnimatedListComponent
 MyNamespace = {}
 MyNamespace.Foo = {}
 
-class MyNamespace.Foo.MyComponent extends Component
+Apollos = {}
+Apollos.Component = Component
+
+class MyNamespace.Foo.MyComponent extends Apollos.Component
   @register 'MyNamespace.Foo.MyComponent'
 
   dataContext: ->

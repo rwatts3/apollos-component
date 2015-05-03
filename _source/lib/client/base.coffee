@@ -61,6 +61,7 @@ getNamespace = (components, path) ->
   match = components
 
   while (segment = path.shift())?
+
     match = match[segment]
 
     if not _.isObject match
@@ -77,6 +78,7 @@ createNamespace = (components, path) ->
   match = components
 
   while (segment = path.shift())?
+
     if not (segment of match)
       match[segment] = new components.constructor()
 
@@ -92,6 +94,7 @@ getComponent = (components, name) ->
     return null
 
   {path, name} = getPathAndName name
+
   namespace = getNamespace components, path
 
   if not namespace
@@ -109,8 +112,8 @@ setComponent = (components, name, component) ->
 
   namespace[components.constructor.COMPONENT] ?= new components.constructor()
 
-
   namespace[components.constructor.COMPONENT][name] = component
+
 
 
 class ComponentNamespace
@@ -150,9 +153,7 @@ class Base
     if componentClass.componentName() and
     componentClass.componentName() isnt componentName and
     getComponent(@components, componentClass.componentName()) is componentClass
-    # if componentClass.componentName() and
-    # componentClass.componentName() isnt componentName and
-    # @components[componentClass.componentName()] is componentClass
+
 
       debug "Component '#{ componentName }' already registered under the name '#{ componentClass.componentName() }'."
       return
@@ -161,7 +162,7 @@ class Base
 
     componentClass.componentName componentName
 
-    setComponent @components, componentName, componentClass
+    setComponent @.components, componentName, componentClass
     # @.components[componentName] = componentClass
 
     # To allow chaining.

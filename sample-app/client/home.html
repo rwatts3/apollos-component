@@ -1,11 +1,11 @@
 <body>
   {{> MainComponent top='42'}}
-  {{> AnimatedListComponent}}
   {{> MyNamespace.Foo.MyComponent top='42'}}
 </body>
 
 <template name="MainComponent">
   <p>Main component: {{componentName}}</p>
+  {{> MyNamespace.Foo.MyComponent top='42'}}
   <button>Foo1</button>
   <p>{{foobar}}</p>
   {{#with a='1' b='2'}}
