@@ -578,12 +578,13 @@ class Component extends Apollos.Base
 
           ###
           subscriptionsList = component.subscriptions()
+
           if _.isArray subscriptionsList
 
             for subscriptions in subscriptionsList
 
               if typeof subscriptions is "string"
-                @.subscribe method
+                @.subscribe subscriptions
                 continue
 
               if _.isObject subscriptions

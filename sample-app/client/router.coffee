@@ -18,6 +18,10 @@ class MainComponent extends Component
     'click': @onClick
   ]
 
+  subscriptions: -> [
+    "foo"
+  ]
+
 Component.register 'MainComponent', MainComponent
 
 class @FooComponent extends Component
